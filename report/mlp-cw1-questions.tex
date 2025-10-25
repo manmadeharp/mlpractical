@@ -26,7 +26,18 @@
 
 %% Question 1:
 \newcommand{\questionOne} {
-\youranswer{Question 1 - Explain what these figures contain and how the curves evolve, and spot where overfitting occurs. Reason based on the min/max points and velocities (direction and magnitude of change) of the accuracy and error curves}
+    \youranswer{After each epoch of training, every batch of the dataset is forward propogated through the neural network model and then evaluated against the associated target labels through the error (or objective function) used for training the model. This gives the error for each epoch of the training process, the accuracy is then calculated as the proportion of the number of data entries the model has correctly predicted as having the highest probability matching the true target labels. these are both recorded and plotted over the entire training process.
+
+    The 
+
+    We can see that at around the 10\textsuperscript{th} epoch, the error of the model for the validation dataset is at its minimum, it then begins to curve upwards this upward curvature is exactly where the overfitting occurs and is due to the model fitting too well to the training dataset (resulting in the variance of the models prediction with respect to the underlying distribution being very high), meaning it has become sensitive to the noise of the data.
+
+    
+
+
+
+
+The Figure 1 presents the error and accuracy evaluations of a neural network being trained on the data, the accuracy is given by the ratio of correctly predicted labels against the total dataset, the graph provides a running accuracy and error over each training cycle (the Epoch), for both the validation and validation datasets..}
 }
 
 %% Question 2:

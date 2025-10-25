@@ -585,7 +585,7 @@ class CustomActivationLayer(Layer):
         Returns:
             outputs: Array of layer outputs of shape (batch_size, output_dim).
         """
-        return 1 / (10 * (1. + np.exp(-inputs)))
+        return 1 / (20 * (1. + np.exp(-inputs)))
 
     def bprop(self, inputs, outputs, grads_wrt_outputs):
         """Back propagates gradients through a layer.
@@ -604,7 +604,7 @@ class CustomActivationLayer(Layer):
             Array of gradients with respect to the layer inputs of shape
             (batch_size, input_dim).
         """
-        return 0.1 * grads_wrt_outputs * outputs * (1. - outputs)
+        return  grads_wrt_outputs * outputs * (1. - 20 * outputs)
 
     def __repr__(self):
         return 'CustomActivationLayer'
@@ -703,8 +703,24 @@ class DropoutLayer(StochasticLayer):
         Returns:
             outputs: Array of layer outputs of shape (batch_size, output_dim).
         """
-        raise NotImplementedError
+        if stochastic and self.share_across_batch:
+            u = self.rng.uniform(0, 1, inputs.shape[1:])
+            include = (u < self.incl_prob).astype(int)
 
+            self.include = include
+            # print("include: ", include, "inputs: ", inputs)
+            return np.multiply(inputs, include)
+        elif stochastic and not self.share_across_batch:
+            u = self.rng.uniform(0, 1, inputs.shape)
+            include = (u < self.incl_prob).astype(int)
+
+            self.include = include
+            # print("include: ", include, "inputs: ", inputs)
+            return np.multiply(inputs, include)         
+        else:
+            # print("include: ", include, "inputs: ", inputs)
+            return inputs*(self.incl_prob)
+    
     def bprop(self, inputs, outputs, grads_wrt_outputs):
         """Back propagates gradients through a layer.
 
@@ -723,7 +739,12 @@ class DropoutLayer(StochasticLayer):
             Array of gradients with respect to the layer inputs of shape
             (batch_size, input_dim).
         """
-        raise NotImplementedError
+        if self.share_across_batch:
+            # include = np.random.binomial(1, self.incl_prob, 1)
+            return grads_wrt_outputs*self.include
+        else:
+            # include = np.random.binomial(1, self.incl_prob, inputs.shape[0])
+            return np.multiply(grads_wrt_outputs, self.include)
 
     def __repr__(self):
         return 'DropoutLayer(incl_prob={0:.1f})'.format(self.incl_prob)
