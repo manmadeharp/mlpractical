@@ -1,5 +1,5 @@
 %% REPLACE SXXXXXX with your student number
-\def\studentNumber{SXXXXXX}
+\def\studentNumber{S2324792}
 
 
 %% START of YOUR ANSWERS
@@ -26,18 +26,18 @@
 
 %% Question 1:
 \newcommand{\questionOne} {
-    \youranswer{After each epoch of training, every batch of the dataset is forward propogated through the neural network model and then evaluated against the associated target labels through the error (or objective function) used for training the model, the final value of the error for model against the entire dataset is then given as the proportion of the cumulative error for each batch against the number of batches, this gives the error for each epoch of the training process. The accuracy for each epoch of training is calculated similarly to the error, except that we calculate the accuracy by taking the predicted classes given by the maximum logit of the output layer for each of the forward propogated data entries of the batch, then evaluate them against the true associated classes and taking the mean as the accuracy for each batch, then just as was done with the error, the final accuracy is given as the average over the entire batch. Both plots present the error and accuracies over the total epochs.
+    \youranswer{
+
+
+% The Figure 1 presents the error and accuracy evaluations of a neural network being trained on the data, the accuracy is given by the ratio of correctly predicted labels against the total dataset, the graph provides a running accuracy and error over each training cycle (the Epoch), for both the validation and validation datasets.
+}
+
+    After each epoch of training, every batch of the dataset is forward propogated through the neural network model for the associated batch of its predictions and then evaluated against the associated target labels through the error (or objective function) used for training the model, the final value of the error for model against the entire dataset is then given as the proportion of the cumulative error for each batch against the number of batches, this gives the error for each epoch of the training process. The accuracy for each epoch of training is calculated similarly to the error, except that we calculate the accuracy by taking the predicted classes given by the maximum logit of the output layer for each of the forward propogated data entries of the batch, then evaluate them against the true associated classes and taking the mean as the accuracy for each batch, then just as was done with the error, the final accuracy is given as the average over the entire batch. Both plots present the error and accuracies over the total epochs.
 
 
 
     We can see that at around the 10\textsuperscript{th} epoch, the error of the model for the validation dataset is at its minimum, it then begins to curve upwards this upward curvature is exactly where the overfitting occurs and is due to the model fitting too well to the training dataset (resulting in the variance of the models prediction with respect to the underlying distribution being very high), meaning it has become sensitive to the noise of the data.
 
-    
-
-
-
-
-The Figure 1 presents the error and accuracy evaluations of a neural network being trained on the data, the accuracy is given by the ratio of correctly predicted labels against the total dataset, the graph provides a running accuracy and error over each training cycle (the Epoch), for both the validation and validation datasets..}
 }
 
 %% Question 2:
@@ -50,6 +50,7 @@ The Figure 1 presents the error and accuracy evaluations of a neural network bei
 \youranswer{Question 3 - Discuss whether varying width affects the results in a consistent way, and whether the results are expected and match well with the prior knowledge (by which we mean your expectations as are formed from the relevant Theory and literature)
 
 }
+    We can see that whilst increasing the width improves the accuracy of the model over the given training data, the accuracy for the validation data decrease as the width increases, this is characterised by the generalisation error of the model, which decreases with the width. The reason for this is due to the model overfitting to the data, in the context of the generalisation error this corresponds to the variance term of the generalisation error bound.
 }
 
 %% Question 4:
@@ -59,9 +60,11 @@ The Figure 1 presents the error and accuracy evaluations of a neural network bei
 
 %% Question 5:
 \newcommand{\questionFive} {
-\youranswer{Question 5 - Discuss whether varying depth affects the results in a consistent way, and whether the results are expected and match well with the prior knowledge (by which we mean your expectations as are formed from the relevant Theory and literature)
+\youranswer{Question 5 - Discuss whether varying depth affects the results consistently, and whether the results are expected and match well with the prior knowledge (by which we mean your expectations as are formed from the relevant Theory and literature)
 
 }
+    The same issue for width occurs as well for depth, except that it seems the validation error changes more for each change in layer, this makes sense given the fact that each layer introduces 128 more neurons, as opposed to the width change, therefore the overfitting should as a result be worse simply due to their being more parameters.
+
 }
 
 
@@ -69,15 +72,17 @@ The Figure 1 presents the error and accuracy evaluations of a neural network bei
 \newcommand{\questionSix} {
 \youranswer{Question 6 - Explain how one could use a combination of L1 and L2 regularisation. Discuss any potential benefits of this approach. Present an equation for this combined loss function and explain all relevant variables and hyperparameters.}
 
+Both the L$1$ and L$2$ penalty can be combined to regularise the objective function together like so 
 $$
-- \log p_\theta \big( y^{(i)} \mid x^{(i)} \big)
+\mathcal{L}(\theta)
 =
-- z_\theta(x^{(i)})_{y^{(i)}} 
-+ 
-\log \Bigg(
-\sum_{j=1}^{K}
-\exp \big( z_\theta(x^{(i)})_j \big)
-\Bigg).
+\mathcal{L}_{\text{Cross Entropy}}(\theta;\mathcal{D})
++
+\lambda_{1}
+\|\theta\|_{1}
++
+\frac{\lambda_{2}}{2}
+\|\theta\|_{2}^{2}.
 $$
 
 }
@@ -89,11 +94,13 @@ $$
 
 (Even if you have not managed to implement your L1 and L2 combination; still argue based on your proposed approach).
 
+}
+
     The L$1$ and L$2$ penalty are calculated for all of the weights and bias vectors in the model, in our implementation the penalty was applied to each layer during the training phase only, by simply adding the value of the gradient of the penalty elementwise to the gradients of the loss function with respect to each weight (the same was done for the bias vector). These penalties have different effects on the behaviour of the gradient descent algorithm during training, we can examine this in a more simple case using their derivates. Each iteration of the (non-stochastic) gradient descent algorithm for a single weight parameter is given as ${w}_i = {w_{i-1}} - \epislon \nabla f(x)$ where $f(x)$ is the objective function, the algorithm converges as $\nabla f(x) \to 0$, therefore given that $\nabla f(x) = \frac{\delta L}{\delta w_i} + \lambda \sign(w_i) \to 0$, for this function to be as close to 0 as possible, we could reduce the magnitude of the gradient term using $\lambda$ term, in which case a choice of the sign of the weight that opposes the sign of the gradient is preferable, or we may choose for ${w_i}=0$ in the case that $\lambda$ is larger than the gradient. From our previous derivation of the loss function gradient with respect to the input layer weights \ref{eq:loss_gradient_cross_softmax} we can see that the size of each element of the input as well as the prediction error has a direct effect on the magnitude of this gradient, therefore it would make sense that an optimal solution would involve a sparse set of weights, where the value of the weights that contribute little to the gradient of the loss function will be zero. For the L$2$ penalty we have a different effect, the gradient of a singular weight for this penalty is given by $\lambda w_i$, therefore if we rearrange the expression we obtain ${w}_i = -\frac{1}{\lambda}\frac{\delta L}{\delta \mathcal{w}_i}$, therefore this penalty causes all of the weights to be closer to zero.
     
 
     Therefore, we chose 4 permutations of parameters that produced the most accurate models in either of the penalties cases. Table 4 illustrates the results.
-}
+
 }
 
 
@@ -102,27 +109,18 @@ $$
 \youranswer{Question 8 - Explain the experimental details (e.g. hyperparameters), discuss the results in terms of their generalisation performance and overfitting. Select and test the best performing model as part of this analysis.
     % The results of the dropout based model also make it very clear that number of parameters of the neural network is only slightly redundant for the given data, since the model beats the baseline at a high inclusion probability starting from $p=0.85$, this is evidence that the model is overfitting to the training data, however that the majority of the parameters of the model are necessary in order to make accurate predictions.
 
+}
+
     A matrix (or vector) norm is a metric for its size, given that the optimisation problem that our stochastic gradient descent aglroithm is trying to solve is that of a minimisation one, this means that this penalty results in weights of greater accumulative size being penalised over those of smaller sizes, therefore the coefficient for the penalty of both norms is proportional to the amount that the weights are restricted to being of a smaller value.
 
     In table 4, the first noticeable result is the results of the L$1$ penalty, there is a large difference in validation accuracy between the neural networks with the L$1$ penalty of values $0.001$ and $0.005$, from our previous paragraph analysing the nature of the L$1$ penalty, we may conclude that the inputs and weights of the model have a great effect on its accuracy, as the small increase in the value of the coefficient (which would cause the zeroing of parameters in the model) has caused a massive decrease in accuracy. This is made more obvious by the improvement of the neural network with L$2$ penalty against the baseline, this means that a reduction in the magnitude of all weights has improved the accuracy of the model. From this we can conclude that the contribution of every distinct pixel in the image are of importance, which makes sense, given that the information available for classifying an image is given by the pixels that make up that image.
 
-
-    
-    
-
-}
 }
 
 
 %% Question 9:
 \newcommand{\questionNine} {
 \youranswer{Question 9 - A colleague proposed using a custom activation function (which can be identified as CustomActivationLayer() in your Coursework\_1.ipynb notebook and the mlp package). Run the prepared experiment in the "Problematic Training" cell in your Coursework\_1.ipynb notebook, and display the results in Figure~6. Analyse the results. Is the model overfitting? Explain the cause of the problematic performance of the model?
-
-    The custom activation function used in this model is scaled logistic function scaled by a constant coefficient, it is defined as $$\frac{1}{20} \sigma(x) = \frac{1}{20(1+\exp(-x))},$$ the original range of this function was $(0,1)$ therefore the scaled logistic function would therefore have the range $(0,0.05)$. We can see evidence of the true issue in the gradient flow graph of Figure ..., which shows an average gradient of zero at the layers the correspond to this custom logistic function, this problem is known as the vanishing gradient problem and is caused by an issue in the calculation of gradients in the backpropogation algorithm \cite{hochreiterGradientFlowRecurrent2001}. For backpropogation, the gradient of the loss with respect to the weights for a layer $l$ is given by $$\Delta_{w^{l}} L = \alpha^{(l+1)} \sigma(x^l)^T$$, where $\sigma$ is the activation function and $\alpha^{l}$ is the error signal computed at each stage by the backpropogation algorithm and is given by $$\alpha^{(l)} = \prod_{k=l}^{L-1} J_{\sigma}(z^{(k)}) (W^{(k+1)})^T \alpha^{(L)}$$ where $L$ is the index of the final layer \cite{petersenMathematicalTheoryDeep2025}.
-
-    Therefore for this specific activation function, the error signal would be given by $$\alpha^{(l)} = \left(\frac{1}{80} \right)^{L-l} \prod_{k=l}^{L-1} J_{\sigma}(z^{(k)}) (W^{(k+1)})^T \alpha^{(L)}$$, as we can see from the coefficient term this would result in an asymptotic decay for each subsequent layer of weights of order $O(80^{-n})$.
-
-    Given that the gradient would then be very small, the perturbation of the weights by stochastic gradient descent will consequently also be small, resulting in a prohibitively slow training process. Knowing we have initialised our weights using Glorot initialisation \cite{glorotUnderstandingDifficultyTraining2010} (resulting in the average of the weights being zero), we can see can see from the gradient flow graph our exact hypothesis, that the change in the mean gradient of the weights has been minimal as the average gradient for every layer other than the final layer (with no subsequent custom residual layer) has an average gradient of approximately zero. 
 
     % One method for addressing this problem whilst keeping the type of activation function is to instead implement it as a residual activation function \cite{heDeepResidualLearning2015}, this method 
 
@@ -135,6 +133,14 @@ $$
 
 
 }
+
+    The custom activation function used in this model is scaled logistic function scaled by a constant coefficient, it is defined as $$\frac{1}{20} \sigma(x) = \frac{1}{20(1+\exp(-x))},$$ the original range of this function was $(0,1)$ therefore the scaled logistic function would therefore have the range $(0,0.05)$. We can see evidence of the true issue in the gradient flow graph of Figure ..., which shows an average gradient of zero at the layers the correspond to this custom logistic function, this problem is known as the vanishing gradient problem and is caused by an issue in the calculation of gradients in the backpropogation algorithm \cite{hochreiterGradientFlowRecurrent2001}. For backpropogation, the gradient of the loss with respect to the weights for a layer $l$ is given by $$\Delta_{w^{l}} L = \alpha^{(l+1)} \sigma(x^l)^T$$, where $\sigma$ is the activation function and $\alpha^{l}$ is the error signal computed at each stage by the backpropogation algorithm and is given by $$\alpha^{(l)} = \prod_{k=l}^{L-1} J_{\sigma}(z^{(k)}) (W^{(k+1)})^T \alpha^{(L)}$$ where $L$ is the index of the final layer \cite{petersenMathematicalTheoryDeep2025}.
+
+    Therefore for this specific activation function, the error signal would be given by $$\alpha^{(l)} = \left(\frac{1}{80} \right)^{L-l} \prod_{k=l}^{L-1} J_{\sigma}(z^{(k)}) (W^{(k+1)})^T \alpha^{(L)}$$, as we can see from the coefficient term this would result in an asymptotic decay for each subsequent layer of weights of order $O(80^{-n})$.
+
+    Given that the gradient would then be very small, the perturbation of the weights by stochastic gradient descent will consequently also be small, resulting in a prohibitively slow training process. Knowing we have initialised our weights using Glorot initialisation \cite{glorotUnderstandingDifficultyTraining2010} (resulting in the average of the weights being zero), we can see can see from the gradient flow graph our exact hypothesis, that the change in the mean gradient of the weights has been minimal as the average gradient for every layer other than the final layer (with no subsequent custom residual layer) has an average gradient of approximately zero. 
+
+
 }
 
 
@@ -144,9 +150,8 @@ $$
 \newcommand{\questionTen} {
 \youranswer{Question 10 - Briefly draw your conclusions based on the results from the previous sections (what are the take-away messages?), discussing them in the context of the overall literature, and conclude your report with a recommendation for future directions
 
-
-
 }
+
 }
 
 %% - - - - - - - - - - - - FIGURES - - - - - - - - - - - - 
@@ -158,13 +163,13 @@ $$
 \begin{figure}[t]
     \centering
     \begin{subfigure}{\linewidth}
-        \includegraphics[width=\linewidth]{figures/acc_curve_width.png}
+        \includegraphics[width=\linewidth]{figures/dim_accuracy.pdf}
         \caption{accuracy by epoch}
         \label{fig:width_acccurves}
     \end{subfigure} 
     \begin{subfigure}{\linewidth}
         \centering
-        \includegraphics[width=\linewidth]{figures/error_curve_width.png}
+        \includegraphics[width=\linewidth]{figures/dim_error.pdf}
         \caption{error by epoch}
         \label{fig:width_errorcurves}
     \end{subfigure} 
@@ -204,13 +209,13 @@ $$
 \begin{figure*}[t]
     \centering
     \begin{subfigure}{.475\linewidth}
-        \includegraphics[width=\linewidth]{figures/empty_dropout_plot.png}
+        \includegraphics[width=\linewidth]{figures/dropout_vs_accuracy_and_gap.pdf}
         \caption{Accuracy and error by inclusion probability.}
         \label{fig:dropoutrates}
     \end{subfigure} 
     \begin{subfigure}{.475\linewidth}
         \centering
-        \includegraphics[width=\linewidth]{figures/empty_wd_plot.png}
+        \includegraphics[width=\linewidth]{figures/weight_decay_vs_accuracy_and_gap.pdf}
         \caption{Accuracy and error by weight penalty.}
         \label{fig:weightrates}
     \end{subfigure} 
@@ -229,6 +234,16 @@ $$
 %% Question Figure 6:
 \newcommand{\questionFigureSix} {
 \youranswer{Question Figure 6 - Add figures depicting the Training Accuracy, Error, and Gradient Flow Across Layers for the 1 experiment run with the Custom Activation function (produce these by running the "Problematic Training" cell in the Coursework\_1.ipynb notebook).
+
+\begin{figure*}[t]
+    \centering
+    \begin{subfigure}{\linewidth}
+        \includegraphics[width=\linewidth]{figures/L1L2genacc.pdf}
+        \label{fig:customtrainingaccuracy}
+    \end{subfigure} 
+    \caption{Training Accuracy, Error, and Gradient Flow Across Layers for the 4 experiment runs for the permutations of the joint L1 and L2 penalty terms.}
+    \label{fig:hp_search}
+\end{figure*}
 }
 }
 
@@ -325,6 +340,25 @@ Question Table 3 - Fill in Table 3 with the results from your experiments for th
 \youranswer{
 Question Table 4 - Add a table with the results from your 4 experiments (by which we mean: 4 training runs, NOT 4 sets of experiments) varying your hyperparameters for the combination of L1 and L2 regularisation (based on your implementation).
 }
+
+\begin{table*}[t]
+    \centering
+    \begin{tabular}{c|c|ccc}
+    \toprule
+        Model & Hyperparameter values $(\lambda_1, \lambda_2)$ & Validation accuracy (\%) & Train Error & Validation Error \\
+    \midrule
+    \midrule
+        \multirow{4}*{$L_{1}$–$L_{2}$ Mix Penalty}
+                 & (5e-4,5e-4) & 79.4 & 0.623 & 0.642 \\
+                 & (5e-4,1e-3)        & 78.7 & 0.660 & 0.677 \\
+                 & (1e-4,1e-3)               & 84.4 & 0.441 & 0.475 \\
+                 & (1e-5,1e-3)               & 85.0 & 0.379 & 0.438 \\
+    \bottomrule
+    \end{tabular}
+    \caption{Final validation accuracy and error values for the $L_{1}$–$L_{2}$ mixed regularisation experiments. Each model was trained with the same architecture and initialization but different $(\lambda_1, \lambda_2)$ coefficients for the respective $L_{1}$ and $L_{2}$ penalties.}
+    \label{tab:l12_mix_results}
+\end{table*}
+
 }
 
 %% END of YOUR ANSWERS
