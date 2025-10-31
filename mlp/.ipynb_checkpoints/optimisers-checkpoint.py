@@ -121,8 +121,7 @@ class Optimiser(object):
         for inputs_batch, targets_batch in dataset:
             activations = self.model.fprop(inputs_batch, evaluation=True)
             for key, data_monitor in self.data_monitors.items():
-                data_mon_vals[key + label] += data_monitor(
-                    activations[-1], targets_batch)
+                data_mon_vals[key + label] += data_monitor(activations[-1], targets_batch) # y_prediction, y_target
         for key, data_monitor in self.data_monitors.items():
             data_mon_vals[key + label] /= dataset.num_batches
         return data_mon_vals
