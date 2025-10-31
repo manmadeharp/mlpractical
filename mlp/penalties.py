@@ -93,16 +93,17 @@ class L1L2MixPenalty(object):
     """L1 & L2 mix penalty.
     """
 
-    def __init__(self, coefficient):
+    def __init__(self, coefficient1, coefficient2):
         """Create a new L1 & L2 mix penalty object.
 
         Args:
             coefficient: Positive constant to scale penalty term by.
         """
-        assert coefficient > 0., 'Penalty coefficient must be positive.'
-        self.coefficient = coefficient
-        self.L1 = L1Penalty(coefficient)
-        self.L2 = L2Penalty(coefficient)
+#         assert coefficient > 0., 'Penalty coefficient must be positive.'
+        self.coefficient1 = coefficient1
+        self.coefficient2 = coefficient2
+        self.L1 = L1Penalty(coefficient1)
+        self.L2 = L2Penalty(coefficient2)
 
     def __call__(self, parameter):
         """Calculate L1 & L2 mix penalty value for a parameter.
@@ -128,4 +129,4 @@ class L1L2MixPenalty(object):
         return self.L1.grad(parameter) + self.L2.grad(parameter)
 
     def __repr__(self):
-        return 'L1L2MixPenalty({0})'.format(self.coefficient)
+        return f'L1L2MixPenalty({self.coefficient}, {self.coefficient})'
